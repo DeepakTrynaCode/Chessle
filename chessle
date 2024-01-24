@@ -1,0 +1,68 @@
+# Chessle
+import chess
+import chess.svg
+
+def analyze_move(board, move):
+    # Simulate the move on a copy of the board
+    temp_board = board.copy()
+    temp_board.push(move)
+
+    # Evaluate the resulting position (basic evaluation for illustration)
+    evaluation = evaluate_position(temp_board)
+
+    return evaluation
+
+def evaluate_position(board):
+    # Basic evaluation function (replace with a more sophisticated one)
+    # In this example, it simply counts the material (number of pieces)
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9,
+        chess.KING: 0  # Assuming the king's value is negligible in this example
+    }
+
+    evaluation = sum(piece_values[piece] for piece in board.piece_map().values())
+    return evaluation
+
+def suggest_best_move(board):
+    legal_moves = list(board.legal_moves)
+    best_move = None
+    best_evaluation = float('-inf')
+
+    for move in legal_moves:
+        evaluation = analyze_move(board, move)
+        if evaluation > best_evaluation:
+            best_evaluation = evaluation
+            best_move = move
+
+    return best_move
+
+if __name__ == "__main__":
+    board = chess.Board()
+    
+    while not board.is_game_over():
+        print(board)
+        player_move_uci = input("Enter your move (in UCI format, e.g., 'e2e4'): ")
+        
+        # Validate and apply the player's move
+        try:
+            player_move = chess.Move.from_uci(player_move_uci)
+            if player_move in board.legal_moves:
+                board.push(player_move)
+            else:
+                print("Invalid move. Try again.")
+                continue
+        except ValueError:
+            print("Invalid move format. Try again.")
+            continue
+
+        # Suggest the best move for the computer
+        computer_move = suggest_best_move(board)
+        board.push(computer_move)
+        print(f"Computer suggests: {computer_move.uci()}")
+    
+    print("Game over. Result:", board.result())
+
